@@ -1,0 +1,65 @@
+package com.example.tiles.presentation
+
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import com.example.tiles.data.TilesDatabase
+import com.example.tiles.data.WordDao
+
+class TilesViewModel (application: Application) : AndroidViewModel(application){
+    private val wordDao: WordDao = TilesDatabase.getInstance(application).wordDao()
+
+    // gets a random category using query from dao file.
+    suspend fun getRandomCategory(): String? {
+        return wordDao.getRandomCategory()
+    }
+
+    // returns the list of words for the cards, adjusting the length based on level difficulty.
+    suspend fun getRandomWords(category: String): List<String> {
+        val words = mutableListOf<String>()
+        val selectedWords = mutableSetOf<String>()
+        var minLength = 10
+        var maxLength = 14
+
+        repeat(3) {
+            var word: String
+            do {
+                word = wordDao.getRandomWord(category) ?: ""
+            } while (word in selectedWords || word.length !in minLength..maxLength)
+            words.add(word)
+            selectedWords.add(word)
+            minLength--
+            maxLength--
+
+        }
+
+        minLength = 6
+        maxLength = 8
+
+        repeat(2) {
+            var word: String
+            do {
+                word = wordDao.getRandomWord(category) ?: ""
+            } while (word in selectedWords || word.length !in minLength..maxLength)
+            words.add(word)
+            selectedWords.add(word)
+            minLength--
+            maxLength--
+        }
+
+        minLength = 3
+        maxLength = 4
+
+        repeat(1) {
+            var word: String
+            do {
+                word = wordDao.getRandomWord(category) ?: ""
+            } while (word in selectedWords || word.length !in minLength..maxLength)
+            words.add(word)
+            selectedWords.add(word)
+            minLength--
+            maxLength--
+        }
+
+        return words
+    }
+}
